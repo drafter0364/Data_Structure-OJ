@@ -17,22 +17,37 @@ typedef struct node
 } DoublyLinkedList;
 DoublyLinkedList *CreateDoublyLinkedList(int n);
 DoublyLinkedList *Locate(DoublyLinkedList *head, int e);
-int sort(DoublyLinkedList *L, DoublyLinkedList *M);
+int sort(DoublyLinkedList *L, DoublyLinkedList *M, int order[], int len);
+int lookup(int order[], int len, int e);
 int main()
 {
     int len;
     scanf("%d", &len);
+    int order[len]; // 记录访问顺序
+    int i;
+    for (i = 0; i < len; i++)
+        order[i] = 0;
     DoublyLinkedList *L, *RequestList;
     L = CreateDoublyLinkedList(len);
     int m, c;
+    int icount = 0; // 记录访问过的元素个数（不计重复）
     DoublyLinkedList *pm;
     do
     {
         scanf("%d", &m);
+        for (i = 0; i < icount; i++)
+            if (m == order[i] && m != 0)
+                break;
+        if (i == icount)
+        {
+            order[icount] = m;
+            icount++; // 记录下新访问的元素
+        }
+
         if (pm = Locate(L, m))
         {
             pm->freq++;
-            sort(L, pm);
+            sort(L, pm, order, icount);
         }
     } while ((c = getchar()) != '\n');
 
@@ -75,13 +90,15 @@ DoublyLinkedList *Locate(DoublyLinkedList *head, int e)
     return p;
 }
 
-int sort(DoublyLinkedList *L, DoublyLinkedList *pm)
+int sort(DoublyLinkedList *L, DoublyLinkedList *pm, int order[], int len)
 {
     DoublyLinkedList *p = pm->prior;
     DoublyLinkedList *q;
     while (p != L && p->freq < pm->freq && p->prior != NULL)
         p = p->prior;
-    if (p ->next!= pm)
+    while (p->freq == pm->freq && lookup(order, len, p->data) > lookup(order, len, pm->data))
+        p = p->prior;
+    if (p->next != pm)
     {
         if (pm->next != NULL)
         {
@@ -98,5 +115,14 @@ int sort(DoublyLinkedList *L, DoublyLinkedList *pm)
         pm->next = q;
         pm->prior = p;
     }
+    return 0;
+}
+
+int lookup(int order[], int len, int e)
+{
+    int i;
+    for (i = 0; i < len; i++)
+        if (order[i] == e)
+            return i;
     return 0;
 }
